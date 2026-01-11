@@ -1,0 +1,297 @@
+import React, { useState } from 'react';
+import { useTranslation } from '../../contexts/LanguageContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+    Plus, Search, MapPin, Star, Filter,
+    ArrowRight, CheckCircle, Globe, Banknote,
+    ShieldCheck, ChevronDown, Landmark, Briefcase
+} from 'lucide-react';
+import ContractFlow from './ContractFlow';
+import LoanApplicationFlow from '../../components/LoanApplicationFlow';
+import { cropCategories } from '../../data/crops';
+
+const farmers = [
+    { id: 1, name: 'Ramesh Patil', rating: 4.8, location: 'Nashik, Maharashtra', land: '15 Acres', crops: ['Wheat', 'Onion'], avatar: '👨‍🌾' },
+    { id: 2, name: 'Suresh Jadhav', rating: 4.5, location: 'Pune, Maharashtra', land: '12 Acres', crops: ['Rice', 'Sugarcane'], avatar: '👨‍🌾' },
+    { id: 3, name: 'Arjun More', rating: 4.9, location: 'Nagpur, Maharashtra', land: '20 Acres', crops: ['Cotton', 'Soybean'], avatar: '👨‍🌾' },
+];
+
+const BusinessDashboard = () => {
+    const { t, setLanguage, language } = useTranslation();
+    const [showModal, setShowModal] = useState(false);
+    const [selectedFarmer, setSelectedFarmer] = useState(null);
+    const [showContract, setShowContract] = useState(false);
+    const [showLoanFlow, setShowLoanFlow] = useState(false);
+    const [activeTab, setActiveTab] = useState('marketplace'); // marketplace, financing
+
+    return (
+        <div style={{ minHeight: '100vh', background: '#f8fafc' }}>
+            {/* Tab Navigation */}
+            <div style={{ background: 'white', borderBottom: '1px solid var(--border)', padding: '0 4rem' }}>
+                <div style={{ display: 'flex', gap: '2rem' }}>
+                    <button
+                        onClick={() => setActiveTab('marketplace')}
+                        style={{
+                            padding: '1.5rem 0.5rem',
+                            border: 'none',
+                            background: 'none',
+                            color: activeTab === 'marketplace' ? 'var(--primary)' : 'var(--text-muted)',
+                            fontWeight: 700,
+                            borderBottom: activeTab === 'marketplace' ? '3px solid var(--primary)' : '3px solid transparent',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem'
+                        }}
+                    >
+                        <Briefcase size={18} /> Farmer Marketplace
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('financing')}
+                        style={{
+                            padding: '1.5rem 0.5rem',
+                            border: 'none',
+                            background: 'none',
+                            color: activeTab === 'financing' ? 'var(--primary)' : 'var(--text-muted)',
+                            fontWeight: 700,
+                            borderBottom: activeTab === 'financing' ? '3px solid var(--primary)' : '3px solid transparent',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem'
+                        }}
+                    >
+                        <Landmark size={18} /> Business Financing
+                    </button>
+                </div>
+            </div>
+
+            <main style={{ padding: '3rem 4rem' }}>
+                {activeTab === 'marketplace' ? (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem' }}>
+                            <div>
+                                <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>Marketplace</h1>
+                                <p style={{ color: 'var(--text-muted)' }}>Browse verified farmers and establish direct trade contracts.</p>
+                            </div>
+                            <button className="btn btn-primary" onClick={() => setShowModal(true)} style={{ padding: '1rem 2rem', borderRadius: 'var(--radius-md)' }}>
+                                <Plus size={20} /> Post New Requirement
+                            </button>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '250px 1fr', gap: '3rem' }}>
+                            {/* Filters Sidebar */}
+                            <aside>
+                                <div className="card" style={{ padding: '1.5rem' }}>
+                                    <h3 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <Filter size={18} /> Filters
+                                    </h3>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 600 }}>Crop Category</label>
+                                            <select style={{ width: '100%', padding: '0.75rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
+                                                <option>All Categories</option>
+                                                {cropCategories.map(cat => (
+                                                    <option key={cat.name} value={cat.name}>{cat.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 600 }}>Specific Crop</label>
+                                            <select style={{ width: '100%', padding: '0.75rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
+                                                <option>All Crops</option>
+                                                {cropCategories.map(cat => (
+                                                    <optgroup key={cat.name} label={cat.name}>
+                                                        {cat.crops.map(crop => (
+                                                            <option key={crop} value={crop}>{crop}</option>
+                                                        ))}
+                                                    </optgroup>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </aside>
+
+                            {/* Main Content: Farmer List */}
+                            <section>
+                                <div style={{ marginBottom: '2rem', display: 'flex', gap: '1rem' }}>
+                                    <div style={{ position: 'relative', flex: 1 }}>
+                                        <Search style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={20} />
+                                        <input type="text" placeholder="Search farmers by name, location, or crop..." style={{
+                                            width: '100%',
+                                            padding: '1rem 1rem 1rem 3rem',
+                                            borderRadius: 'var(--radius-md)',
+                                            border: '1px solid var(--border)',
+                                            boxShadow: 'var(--shadow-sm)'
+                                        }} />
+                                    </div>
+                                </div>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                    {farmers.map(farmer => (
+                                        <motion.div
+                                            key={farmer.id}
+                                            whileHover={{ x: 5 }}
+                                            className="card"
+                                            style={{ display: 'flex', alignItems: 'center', gap: '2rem', padding: '1.5rem' }}
+                                        >
+                                            <div style={{ fontSize: '3rem' }}>{farmer.avatar}</div>
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.25rem' }}>
+                                                    <h3 style={{ fontSize: '1.25rem' }}>{farmer.name}</h3>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#B8860B', fontSize: '0.9rem', fontWeight: 700 }}>
+                                                        <Star size={16} fill="#B8860B" /> {farmer.rating}
+                                                    </div>
+                                                </div>
+                                                <div style={{ display: 'flex', gap: '1.5rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><MapPin size={14} /> {farmer.location}</span>
+                                                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>🌾 {farmer.land}</span>
+                                                </div>
+                                                <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
+                                                    {farmer.crops.map(crop => (
+                                                        <span key={crop} style={{ padding: '0.25rem 0.75rem', background: 'rgba(45, 90, 39, 0.05)', borderRadius: 'var(--radius-full)', fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 600 }}>{crop}</span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <button className="btn btn-secondary">View Profile</button>
+                                            <button className="btn btn-primary" onClick={() => { setSelectedFarmer(farmer); setShowContract(true); }}>
+                                                Select Farmer <ArrowRight size={18} />
+                                            </button>
+                                        </motion.div>
+                                    ))}
+                                </div>
+                            </section>
+                        </div>
+                    </motion.div>
+                ) : (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ maxWidth: '900px', margin: '0 auto' }}>
+                        <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
+                            <div style={{
+                                width: '80px', height: '80px', background: 'rgba(45, 90, 39, 0.1)',
+                                color: 'var(--primary)', borderRadius: '50%', display: 'flex',
+                                alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem'
+                            }}>
+                                <Landmark size={40} />
+                            </div>
+                            <h1 style={{ fontSize: '2.5rem' }}>Institutional Credit</h1>
+                            <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem', maxWidth: '600px', margin: '1rem auto' }}>
+                                Access low-interest working capital by leveraging your active platform contracts as collateral.
+                            </p>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '3rem' }}>
+                            <div className="card" style={{ padding: '2rem', border: '1px solid var(--primary)', background: 'white' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                                    <ShieldCheck color="var(--primary)" />
+                                    <h3 style={{ margin: 0 }}>Trust Indicators</h3>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.75rem', borderBottom: '1px solid #f1f5f9' }}>
+                                        <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Platform Trust Score</span>
+                                        <span style={{ fontWeight: 800, color: 'var(--primary)' }}>84/100</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.75rem', borderBottom: '1px solid #f1f5f9' }}>
+                                        <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>KYC Status</span>
+                                        <span style={{ fontWeight: 700, color: 'var(--success)', fontSize: '0.8rem' }}>VERIFIED</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Contract Reliability</span>
+                                        <span style={{ fontWeight: 700 }}>96%</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="card" style={{ padding: '2rem', border: '1px solid var(--primary)', background: 'white' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+                                    <Banknote color="var(--primary)" />
+                                    <h3 style={{ margin: 0 }}>Collateral Value</h3>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.75rem', borderBottom: '1px solid #f1f5f9' }}>
+                                        <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Active Contracts</span>
+                                        <span style={{ fontWeight: 700 }}>4 Active</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.75rem', borderBottom: '1px solid #f1f5f9' }}>
+                                        <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Total Contract Value</span>
+                                        <span style={{ fontWeight: 700 }}>₹12.5L</span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Eligibility Coverage</span>
+                                        <span style={{ fontWeight: 800, color: 'var(--primary)' }}>₹5.0L</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="card" style={{ padding: '3rem', textAlign: 'center', background: '#f8fafc' }}>
+                            <h3 style={{ marginBottom: '1rem' }}>Ready to fuel your growth?</h3>
+                            <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>Apply for a business loan today and get approved within 24 hours based on your platform performance.</p>
+                            <button className="btn btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.1rem' }} onClick={() => setShowLoanFlow(true)}>
+                                Initialize Loan Application
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </main>
+
+            {/* Modals */}
+            <AnimatePresence>
+                {showModal && (
+                    <div style={{
+                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '2rem'
+                    }}>
+                        <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="card" style={{ maxWidth: '600px', width: '100%', padding: '3rem' }}>
+                            <h2 style={{ marginBottom: '2rem' }}>Post Crop Requirement</h2>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                <div className="input-group">
+                                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Crops Needed</label>
+                                    <select style={{ width: '100%', padding: '1rem', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)' }}>
+                                        {cropCategories.map(cat => (
+                                            <optgroup key={cat.name} label={cat.name}>
+                                                {cat.crops.map(crop => (
+                                                    <option key={crop} value={crop}>{crop}</option>
+                                                ))}
+                                            </optgroup>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <input type="number" placeholder="Quantity (Quintals)" style={{ width: '100%', padding: '1rem', border: '1px solid var(--border)' }} />
+                                    <input type="number" placeholder="Price ₹" style={{ width: '100%', padding: '1rem', border: '1px solid var(--border)' }} />
+                                </div>
+                                <textarea rows="3" placeholder="Describe organic methods, seed variety..." style={{ width: '100%', padding: '1rem', border: '1px solid var(--border)', fontFamily: 'inherit' }} />
+                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                    <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowModal(false)}>Cancel</button>
+                                    <button className="btn btn-primary" style={{ flex: 2 }} onClick={() => setShowModal(false)}>Post Requirement</button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {showLoanFlow && (
+                    <LoanApplicationFlow onClose={() => setShowLoanFlow(false)} onComplete={() => setShowLoanFlow(false)} />
+                )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+                {showContract && selectedFarmer && (
+                    <div style={{
+                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1100, padding: '2rem'
+                    }}>
+                        <ContractFlow farmer={selectedFarmer} onComplete={() => { setShowContract(false); setSelectedFarmer(null); }} />
+                    </div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
+
+export default BusinessDashboard;
