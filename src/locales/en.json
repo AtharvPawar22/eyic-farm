@@ -35,5 +35,13 @@
     "purpose": "Loan Purpose",
     "tenure": "Tenure",
     "status": "Loan Status"
+  },
+  "contract": {
+    "generating": "Generating your contract...",
+    "preview": "Contract Preview",
+    "edit": "Edit Requirements",
+    "regenerate": "Regenerate Contract",
+    "terms": "Contract Terms",
+    "sign": "E-Sign Agreement"
   }
 }

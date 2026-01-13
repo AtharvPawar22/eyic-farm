@@ -1,70 +1,248 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Shield, CreditCard, ChevronRight, Check } from 'lucide-react';
+import { FileText, Shield, CreditCard, ChevronRight, Check, Loader2, RefreshCw } from 'lucide-react';
 import { useTranslation } from '../../contexts/LanguageContext';
+import { generateContractLocally } from '../../services/contractEngine';
+import ContractDisplay from '../../components/ContractDisplay';
 
 const ContractFlow = ({ farmer, onComplete }) => {
-    const [step, setStep] = useState('review'); // review, sign, pay, done
-    const { t } = useTranslation();
+    const [step, setStep] = useState('form'); // form, generating, review, sign, pay, done
+    const [loading, setLoading] = useState(false);
+    const [contractContent, setContractContent] = useState('');
+    const { t, language } = useTranslation();
+
+    const [formData, setFormData] = useState({
+        farmerName: farmer.name,
+        farmerId: farmer.id,
+        businessName: 'AgriCorp Ltd.',
+        businessGst: '27AABCU9603R1Z',
+        cropName: 'Premium Organic Wheat',
+        quantity: 50,
+        unit: 'Quintals',
+        price: 4200,
+        deliveryDate: '2025-10-15',
+    });
+
+    const [selectedClauses, setSelectedClauses] = useState(['quality', 'forceMajeure']); // Default on for most deals
+
+    const toggleClause = (clause) => {
+        setSelectedClauses(prev =>
+            prev.includes(clause)
+                ? prev.filter(c => c !== clause)
+                : [...prev, clause]
+        );
+    };
+
+    const handleFormSubmit = async (e) => {
+        e.preventDefault();
+        setStep('generating');
+
+        // Brief artificial delay for "AI sensation" feel, but 100% reliable local generation
+        setTimeout(() => {
+            const content = generateContractLocally(formData, language, selectedClauses);
+            setContractContent(content);
+            setStep('review');
+        }, 1500);
+    };
+
+    const handleRegenerate = () => {
+        setStep('form');
+    };
 
     return (
         <div className="glass" style={{
-            padding: '3rem',
+            padding: '2rem',
             borderRadius: 'var(--radius-lg)',
-            maxWidth: '800px',
+            maxWidth: '900px',
             width: '100%',
             maxHeight: '90vh',
-            overflowY: 'auto'
+            overflowY: 'auto',
+            background: 'rgba(255, 255, 255, 0.95)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.15)'
         }}>
+            {step === 'form' && (
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+                        <div style={{ background: 'var(--primary-light)', p: '10px', borderRadius: '12px' }}>
+                            <FileText size={32} color="var(--primary)" />
+                        </div>
+                        <div>
+                            <h2 style={{ fontSize: '1.75rem', fontWeight: 700, margin: 0 }}>Create Smart Contract</h2>
+                            <p style={{ color: 'var(--text-muted)', margin: 0 }}>Define terms for AI-powered legal document generation</p>
+                        </div>
+                    </div>
+
+                    <form onSubmit={handleFormSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                        <div className="form-group" style={{ gridColumn: 'span 2' }}>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Farmer Name</label>
+                            <input type="text" value={formData.farmerName} disabled className="form-control" style={{ width: '100%', background: '#f1f5f9' }} />
+                        </div>
+
+                        <div className="form-group">
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Crop Selection</label>
+                            <input
+                                type="text"
+                                value={formData.cropName}
+                                onChange={(e) => setFormData({ ...formData, cropName: e.target.value })}
+                                className="form-control"
+                                style={{ width: '100%' }}
+                                required
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Quantity</label>
+                            <input
+                                type="number"
+                                value={formData.quantity}
+                                onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
+                                className="form-control"
+                                style={{ width: '100%' }}
+                                required
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Unit</label>
+                            <select
+                                value={formData.unit}
+                                onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                                className="form-control"
+                                style={{ width: '100%' }}
+                            >
+                                <option>Quintals</option>
+                                <option>Kilograms</option>
+                                <option>Tons</option>
+                            </select>
+                        </div>
+
+                        <div className="form-group">
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Price per Unit (₹)</label>
+                            <input
+                                type="number"
+                                value={formData.price}
+                                onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                                className="form-control"
+                                style={{ width: '100%' }}
+                                required
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Expected Delivery Date</label>
+                            <input
+                                type="date"
+                                value={formData.deliveryDate}
+                                onChange={(e) => setFormData({ ...formData, deliveryDate: e.target.value })}
+                                className="form-control"
+                                style={{ width: '100%' }}
+                                required
+                            />
+                        </div>
+
+                        <div style={{ gridColumn: 'span 2', marginTop: '1rem' }}>
+                            <h4 style={{ marginBottom: '1rem', fontWeight: 600 }}>Additional Provisions</h4>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
+                                {[
+                                    { id: 'quality', label: 'Quality Standards', desc: '7-day inspection window' },
+                                    { id: 'forceMajeure', label: 'Force Majeure', desc: 'Natural disaster protection' },
+                                    { id: 'organicCert', label: 'Organic Cert.', desc: 'Warranty of organic practices' },
+                                    { id: 'insurance', label: 'Crop Insurance', desc: 'Declare insurance coverage' }
+                                ].map(clause => (
+                                    <div
+                                        key={clause.id}
+                                        onClick={() => toggleClause(clause.id)}
+                                        style={{
+                                            padding: '1rem',
+                                            borderRadius: '12px',
+                                            border: `2px solid ${selectedClauses.includes(clause.id) ? 'var(--primary)' : 'var(--border)'}`,
+                                            background: selectedClauses.includes(clause.id) ? 'var(--primary-light)' : 'white',
+                                            cursor: 'pointer',
+                                            transition: 'all 0.2s ease',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '0.75rem'
+                                        }}
+                                    >
+                                        <div style={{
+                                            width: '20px',
+                                            height: '20px',
+                                            borderRadius: '4px',
+                                            border: '2px solid var(--primary)',
+                                            background: selectedClauses.includes(clause.id) ? 'var(--primary)' : 'transparent',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            color: 'white'
+                                        }}>
+                                            {selectedClauses.includes(clause.id) && <Check size={14} strokeWidth={4} />}
+                                        </div>
+                                        <div>
+                                            <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{clause.label}</div>
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{clause.desc}</div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div style={{ background: '#f8fafc', padding: '1.5rem', borderRadius: '12px', border: '1px dashed var(--border)', marginBottom: '1.5rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                    <span>Advance Funding (25%)</span>
+                                    <span style={{ fontWeight: 700, color: 'var(--primary)' }}>₹{(formData.quantity * formData.price * 0.25).toLocaleString()}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                    <span>Total Value</span>
+                                    <span style={{ fontWeight: 700 }}>₹{(formData.quantity * formData.price).toLocaleString()}</span>
+                                </div>
+                            </div>
+
+                            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }}>
+                                Generate Legal Fair Contract <ChevronRight size={20} />
+                            </button>
+                        </div>
+                    </form>
+                </motion.div>
+            )}
+
+            {step === 'generating' && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+                    <div className="spinner-container" style={{ position: 'relative', display: 'inline-block', marginBottom: '2.5rem' }}>
+                        <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                        >
+                            <RefreshCw size={64} color="var(--primary)" />
+                        </motion.div>
+                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
+                            <FileText size={24} color="var(--primary)" />
+                        </div>
+                    </div>
+                    <h2 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '1rem' }}>Drafting Smart Agreement...</h2>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem', maxWidth: '400px', margin: '0 auto' }}>
+                        Generating a tailored, fair agreement between you and <strong>{formData.farmerName}</strong> with full legal compliance.
+                    </p>
+                </motion.div>
+            )}
+
             {step === 'review' && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-                        <FileText size={32} color="var(--primary)" />
-                        <h2>Digital Agriculture Contract</h2>
+                    <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                            <h2 style={{ fontSize: '1.75rem', fontWeight: 700, margin: 0 }}>Review Smart-Drafted Contract</h2>
+                            <p style={{ color: 'var(--text-muted)', margin: 0 }}>Tailored based on your deal terms</p>
+                        </div>
+                        <span className="badge badge-success" style={{ background: '#dcfce7', color: '#166534', padding: '8px 16px', borderRadius: '20px', fontWeight: 600 }}>
+                            <Shield size={16} style={{ marginRight: '6px' }} /> Verified Template
+                        </span>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
-                        <div className="card" style={{ padding: '1.5rem', background: '#f8fafc' }}>
-                            <h4 style={{ color: 'var(--text-muted)', marginBottom: '0.5rem' }}>BUSINESS (First Party)</h4>
-                            <p style={{ fontWeight: 600 }}>AgriCorp Ltd.</p>
-                            <p style={{ fontSize: '0.9rem' }}>GST: 27AABCU9603R1Z</p>
-                        </div>
-                        <div className="card" style={{ padding: '1.5rem', background: '#f8fafc' }}>
-                            <h4 style={{ color: 'var(--text-muted)', marginBottom: '0.5rem' }}>FARMER (Second Party)</h4>
-                            <p style={{ fontWeight: 600 }}>{farmer.name}</p>
-                            <p style={{ fontSize: '0.9rem' }}>ID: {farmer.id}00-XXXX-XXXX</p>
-                        </div>
-                    </div>
-
-                    <div className="card" style={{ marginBottom: '2rem' }}>
-                        <h3>Contract Terms</h3>
-                        <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.5rem', borderBottom: '1px solid #f1f5f9' }}>
-                                <span>Crop Selection</span>
-                                <span style={{ fontWeight: 600 }}>Premium Organic Wheat</span>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.5rem', borderBottom: '1px solid #f1f5f9' }}>
-                                <span>Required Quantity</span>
-                                <span style={{ fontWeight: 600 }}>50 Quintals</span>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.5rem', borderBottom: '1px solid #f1f5f9' }}>
-                                <span>Agreed Price / Quintal</span>
-                                <span style={{ fontWeight: 600 }}>₹4,200</span>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <span>Advance Funding (25%)</span>
-                                <span style={{ fontWeight: 600, color: 'var(--primary)' }}>₹52,500</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '2rem' }}>
-                        * This contract is legally binding and governed by the Agricultural Contract Act. Both parties agree to the quality standards and risk-sharing clauses defined in the platform's terms of service.
-                    </p>
-
-                    <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => setStep('sign')}>
-                        Confirm Terms & Proceed to E-Sign <ChevronRight size={18} />
-                    </button>
+                    <ContractDisplay
+                        content={contractContent}
+                        onEdit={handleRegenerate}
+                        onSign={() => setStep('sign')}
+                    />
                 </motion.div>
             )}
 
@@ -93,6 +271,7 @@ const ContractFlow = ({ farmer, onComplete }) => {
                     <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => setStep('pay')}>
                         Verify & Sign Contract
                     </button>
+                    <button className="btn btn-link" onClick={() => setStep('review')} style={{ marginTop: '1rem' }}>Back to Review</button>
                 </motion.div>
             )}
 
@@ -107,15 +286,15 @@ const ContractFlow = ({ farmer, onComplete }) => {
                     <div className="card" style={{ background: '#f8fafc', padding: '2rem', marginBottom: '2.5rem' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                             <span>Advance to Farmer</span>
-                            <span>₹52,500</span>
+                            <span>₹{(formData.quantity * formData.price * 0.25).toLocaleString()}</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '1rem', borderBottom: '1px solid var(--border)' }}>
                             <span>Platform Fee (2%)</span>
-                            <span>₹1,050</span>
+                            <span>₹{(formData.quantity * formData.price * 0.25 * 0.02).toLocaleString()}</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem', fontSize: '1.25rem', fontWeight: 700 }}>
                             <span>Total Payable</span>
-                            <span style={{ color: 'var(--primary)' }}>₹53,550</span>
+                            <span style={{ color: 'var(--primary)' }}>₹{(formData.quantity * formData.price * 0.25 * 1.02).toLocaleString()}</span>
                         </div>
                     </div>
 
@@ -147,10 +326,9 @@ const ContractFlow = ({ farmer, onComplete }) => {
                     </div>
                     <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Contract Finalized!</h2>
                     <p style={{ color: 'var(--text-muted)', marginBottom: '3rem' }}>
-                        The contract #FC-2025-092 is now active. Ramesh Patil has been notified to begin cultivation.
+                        The contract is now active. {formData.farmerName} has been notified to begin cultivation.
                     </p>
                     <div style={{ display: 'flex', gap: '1rem' }}>
-                        <button className="btn btn-secondary" style={{ flex: 1 }}>Download PDF</button>
                         <button className="btn btn-primary" style={{ flex: 1 }} onClick={onComplete}>Back to Dashboard</button>
                     </div>
                 </motion.div>
