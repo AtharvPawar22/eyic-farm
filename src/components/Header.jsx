@@ -114,6 +114,29 @@ const Header = () => {
                         </button>
                     ))}
                 </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginLeft: '1rem', borderLeft: '1px solid var(--border)', paddingLeft: '1.5rem' }}>
+                    <button
+                        onClick={() => navigate('/roles')}
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--text-main)',
+                            fontWeight: 600,
+                            fontSize: '0.9rem',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        Login
+                    </button>
+                    <button
+                        onClick={() => navigate('/roles')}
+                        className="btn btn-primary"
+                        style={{ padding: '0.6rem 1.25rem', fontSize: '0.9rem' }}
+                    >
+                        Register
+                    </button>
+                </div>
             </div>
         </header>
     );

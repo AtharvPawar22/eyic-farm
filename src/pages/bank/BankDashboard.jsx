@@ -170,10 +170,24 @@ const BankDashboard = () => {
                                                     <span style={{ fontWeight: 600 }}>{selectedApplication.purpose}</span>
                                                 </div>
                                                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
-                                                    <button className="btn btn-secondary" style={{ flex: 1, color: '#EF4444' }}>
+                                                    <button
+                                                        className="btn btn-secondary"
+                                                        style={{ flex: 1, color: '#EF4444' }}
+                                                        onClick={() => {
+                                                            alert(`Application ${selectedApplication.id} REJECTED`);
+                                                            setSelectedApplication(prev => ({ ...prev, status: LOAN_STATUS.REJECTED }));
+                                                        }}
+                                                    >
                                                         <XCircle size={18} /> Reject
                                                     </button>
-                                                    <button className="btn btn-primary" style={{ flex: 2 }}>
+                                                    <button
+                                                        className="btn btn-primary"
+                                                        style={{ flex: 2 }}
+                                                        onClick={() => {
+                                                            alert(`Application ${selectedApplication.id} APPROVED`);
+                                                            setSelectedApplication(prev => ({ ...prev, status: LOAN_STATUS.APPROVED }));
+                                                        }}
+                                                    >
                                                         <CheckCircle size={18} /> Approve Loan
                                                     </button>
                                                 </div>

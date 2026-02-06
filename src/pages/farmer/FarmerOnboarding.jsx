@@ -14,6 +14,9 @@ const steps = [
 const FarmerOnboarding = () => {
     const { t } = useTranslation();
     const [currentStep, setCurrentStep] = useState(0);
+    const [isLocating, setIsLocating] = useState(false);
+    const [location, setLocation] = useState('');
+    const [selectedCrops, setSelectedCrops] = useState([]);
     const navigate = useNavigate();
 
     const handleNext = () => {
@@ -31,6 +34,31 @@ const FarmerOnboarding = () => {
         } else {
             navigate('/roles');
         }
+    };
+
+    const detectLocation = () => {
+        setIsLocating(true);
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    setLocation(`${latitude.toFixed(4)}, ${longitude.toFixed(4)} (GPS Verified)`);
+                    setIsLocating(false);
+                },
+                (error) => {
+                    console.error("Error detecting location:", error);
+                    setIsLocating(false);
+                }
+            );
+        } else {
+            setIsLocating(false);
+        }
+    };
+
+    const toggleCrop = (crop) => {
+        setSelectedCrops(prev =>
+            prev.includes(crop) ? prev.filter(c => c !== crop) : [...prev, crop]
+        );
     };
 
     return (
@@ -150,11 +178,27 @@ const FarmerOnboarding = () => {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                                 <div className="input-group">
                                     <label style={{ display: 'block', marginBottom: '0.5rem' }}>Land Size (in Acres)</label>
-                                    <input type="number" style={{ width: '100%', padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }} />
+                                    <input type="number" placeholder="Enter acres" style={{ width: '100%', padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }} />
                                 </div>
                                 <div className="input-group">
                                     <label style={{ display: 'block', marginBottom: '0.5rem' }}>Location (Tehsil / District)</label>
-                                    <input type="text" style={{ width: '100%', padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }} />
+                                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                        <input
+                                            type="text"
+                                            value={location}
+                                            onChange={(e) => setLocation(e.target.value)}
+                                            placeholder="Enter location or auto-detect"
+                                            style={{ flex: 1, padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}
+                                        />
+                                        <button
+                                            onClick={detectLocation}
+                                            disabled={isLocating}
+                                            className="btn btn-secondary"
+                                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap' }}
+                                        >
+                                            <MapPin size={18} /> {isLocating ? 'Locating...' : 'Auto-detect'}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -163,18 +207,33 @@ const FarmerOnboarding = () => {
                     {currentStep === 3 && (
                         <div>
                             <h2 style={{ marginBottom: '1.5rem' }}>Crop History</h2>
-                            <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>What crops do you usually grow? This helps businesses find you.</p>
+                            <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>What crops do you usually grow? Select all that apply.</p>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem' }}>
-                                {['Wheat', 'Rice', 'Soybean', 'Cotton', 'Sugarcane', 'Others'].map(crop => (
-                                    <div key={crop} style={{
-                                        padding: '1rem',
-                                        border: '1px solid var(--border)',
-                                        borderRadius: 'var(--radius-sm)',
-                                        textAlign: 'center',
-                                        cursor: 'pointer'
-                                    }}>
+                                {['Wheat', 'Rice', 'Soybean', 'Cotton', 'Sugarcane', 'Maize', 'Onion', 'Potato', 'Others'].map(crop => (
+                                    <motion.div
+                                        key={crop}
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        onClick={() => toggleCrop(crop)}
+                                        style={{
+                                            padding: '1.25rem 1rem',
+                                            border: `2px solid ${selectedCrops.includes(crop) ? 'var(--primary)' : 'var(--border)'}`,
+                                            background: selectedCrops.includes(crop) ? 'rgba(45, 90, 39, 0.05)' : 'white',
+                                            color: selectedCrops.includes(crop) ? 'var(--primary)' : 'var(--text-main)',
+                                            borderRadius: 'var(--radius-md)',
+                                            textAlign: 'center',
+                                            cursor: 'pointer',
+                                            fontWeight: selectedCrops.includes(crop) ? 700 : 500,
+                                            transition: 'all 0.2s ease',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            gap: '0.5rem'
+                                        }}
+                                    >
                                         {crop}
-                                    </div>
+                                        {selectedCrops.includes(crop) && <CheckCircle2 size={16} />}
+                                    </motion.div>
                                 ))}
                             </div>
                         </div>

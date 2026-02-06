@@ -43,5 +43,22 @@
     "regenerate": "Regenerate Contract",
     "terms": "Contract Terms",
     "sign": "E-Sign Agreement"
+  },
+  "quality": {
+    "title": "Quality Control & Monitoring",
+    "desc": "Real-time crop health and quality parameter tracking for all active contracts.",
+    "activeBatches": "Active Batches",
+    "batchId": "Batch ID",
+    "crop": "Crop",
+    "status": "Status",
+    "params": "Parameters",
+    "moisture": "Moisture",
+    "purity": "Purity",
+    "health": "Health",
+    "certified": "Certified",
+    "monitored": "Monitoring",
+    "viewReport": "View Full Report",
+    "lastUpdate": "Last Updated",
+    "estimate": "Yield Estimate"
   }
 }

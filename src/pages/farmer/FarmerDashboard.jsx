@@ -1,12 +1,10 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from '../../contexts/LanguageContext';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Wallet, FileCheck, Tractor, TrendingUp, Landmark, ShieldCheck } from 'lucide-react';
-import LoanApplicationFlow from '../../components/LoanApplicationFlow';
+import { motion } from 'framer-motion';
+import { Bell, Wallet, FileCheck, Tractor, TrendingUp, ShieldCheck, Microscope, ThermometerSun } from 'lucide-react';
 
 const FarmerDashboard = () => {
     const { t } = useTranslation();
-    const [showLoanFlow, setShowLoanFlow] = useState(false);
 
     const stats = [
         { label: 'Active Contracts', value: '2', icon: <FileCheck color="var(--primary)" /> },
@@ -106,22 +104,7 @@ const FarmerDashboard = () => {
 
                     {/* Sidebar */}
                     <aside style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                        {/* Financing Section */}
-                        <section>
-                            <h2 style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                <Landmark size={24} color="var(--primary)" /> Financing & Loans
-                            </h2>
-                            <div className="card" style={{ padding: '1.5rem', border: '1px solid var(--primary)', background: 'rgba(45, 90, 39, 0.02)' }}>
-                                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Est. Loan Eligibility</div>
-                                <div style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--primary)', marginBottom: '1rem' }}>₹2,50,000</div>
-                                <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-                                    Based on your active contracts and verified land records.
-                                </p>
-                                <button className="btn btn-primary" style={{ width: '100%' }} onClick={() => setShowLoanFlow(true)}>
-                                    Apply for Fast Loan
-                                </button>
-                            </div>
-                        </section>
+
 
                         {/* Market Insights */}
                         <section>
@@ -137,18 +120,45 @@ const FarmerDashboard = () => {
                                 <button className="btn" style={{ background: 'white', color: 'var(--primary)', width: '100%' }}>View Offers</button>
                             </div>
                         </section>
+
+                        {/* Quality & Growth Monitoring */}
+                        <section>
+                            <div className="card" style={{ padding: '1.5rem', border: '1px solid rgba(45, 90, 39, 0.1)' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary)', fontWeight: 700 }}>
+                                        <Microscope size={18} /> {t('quality.title')}
+                                    </div>
+                                    <ThermometerSun size={18} color="#B8860B" />
+                                </div>
+                                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
+                                    {t('quality.desc')}
+                                </p>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.5rem' }}>
+                                    <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: 'var(--radius-sm)' }}>
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>{t('quality.estimate')}</div>
+                                        <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>8.5 Quintals / Acre</div>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '1rem' }}>
+                                        <div style={{ flex: 1 }}>
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t('quality.moisture')}</div>
+                                            <div style={{ fontSize: '1rem', fontWeight: 600 }}>12.4%</div>
+                                        </div>
+                                        <div style={{ flex: 1 }}>
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{t('quality.health')}</div>
+                                            <div style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--success)' }}>Optimal</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button className="btn btn-secondary" style={{ width: '100%', fontSize: '0.85rem' }}>
+                                    {t('quality.viewReport')}
+                                </button>
+                            </div>
+                        </section>
                     </aside>
                 </div>
             </main>
 
-            <AnimatePresence>
-                {showLoanFlow && (
-                    <LoanApplicationFlow
-                        onClose={() => setShowLoanFlow(false)}
-                        onComplete={() => setShowLoanFlow(false)}
-                    />
-                )}
-            </AnimatePresence>
+
         </div>
     );
 };

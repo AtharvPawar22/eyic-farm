@@ -3,10 +3,12 @@ import { useTranslation } from '../../contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Building2, FileText, Banknote, ArrowLeft, ArrowRight } from 'lucide-react';
+import FileUpload from '../../components/FileUpload';
 
 const BusinessOnboarding = () => {
     const { t } = useTranslation();
     const [step, setStep] = useState(1);
+    const [regFile, setRegFile] = useState(null);
     const navigate = useNavigate();
 
     const handleNext = () => step < 3 ? setStep(step + 1) : navigate('/business/dashboard');
@@ -44,9 +46,12 @@ const BusinessOnboarding = () => {
                                 <h2>Legal Documentation</h2>
                             </div>
                             <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>Upload your business registration documents for verification.</p>
-                            <div style={{ border: '2px dashed var(--border)', padding: '3rem', textAlign: 'center', borderRadius: 'var(--radius-md)' }}>
-                                Drop files here or click to upload
-                            </div>
+                            <FileUpload
+                                label="Registration Certificate (GST/PAN)"
+                                value={regFile}
+                                onFileSelect={setRegFile}
+                                accept=".pdf,.doc,.docx,.jpg,.png"
+                            />
                         </div>
                     )}
 

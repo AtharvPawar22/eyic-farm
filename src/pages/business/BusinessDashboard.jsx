@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Plus, Search, MapPin, Star, Filter,
     ArrowRight, CheckCircle, Globe, Banknote,
-    ShieldCheck, ChevronDown, Landmark, Briefcase
+    ShieldCheck, ChevronDown, Landmark, Briefcase, Microscope, ThermometerSun
 } from 'lucide-react';
 import ContractFlow from './ContractFlow';
 import LoanApplicationFlow from '../../components/LoanApplicationFlow';
@@ -16,13 +16,19 @@ const farmers = [
     { id: 3, name: 'Arjun More', rating: 4.9, location: 'Nagpur, Maharashtra', land: '20 Acres', crops: ['Cotton', 'Soybean'], avatar: '👨‍🌾' },
 ];
 
+const qualityBatches = [
+    { id: 'BAT-001', farmer: 'Ramesh Patil', crop: 'Organic Wheat', status: 'Optimal', moisture: '12.4%', purity: '99.2%', health: 'Excellent', lastUpdate: '2h ago' },
+    { id: 'BAT-002', farmer: 'Suresh Jadhav', crop: 'Rice', status: 'Monitoring', moisture: '14.1%', purity: '98.5%', health: 'Good', lastUpdate: '5h ago' },
+    { id: 'BAT-003', farmer: 'Arjun More', crop: 'Soybean', status: 'Certified', moisture: '11.8%', purity: '99.8%', health: 'Standard', lastUpdate: '1d ago' },
+];
+
 const BusinessDashboard = () => {
     const { t, setLanguage, language } = useTranslation();
     const [showModal, setShowModal] = useState(false);
     const [selectedFarmer, setSelectedFarmer] = useState(null);
     const [showContract, setShowContract] = useState(false);
     const [showLoanFlow, setShowLoanFlow] = useState(false);
-    const [activeTab, setActiveTab] = useState('marketplace'); // marketplace, financing
+    const [activeTab, setActiveTab] = useState('marketplace'); // marketplace, financing, quality
 
     return (
         <div style={{ minHeight: '100vh', background: '#f8fafc' }}>
@@ -63,11 +69,28 @@ const BusinessDashboard = () => {
                     >
                         <Landmark size={18} /> Business Financing
                     </button>
+                    <button
+                        onClick={() => setActiveTab('quality')}
+                        style={{
+                            padding: '1.5rem 0.5rem',
+                            border: 'none',
+                            background: 'none',
+                            color: activeTab === 'quality' ? 'var(--primary)' : 'var(--text-muted)',
+                            fontWeight: 700,
+                            borderBottom: activeTab === 'quality' ? '3px solid var(--primary)' : '3px solid transparent',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem'
+                        }}
+                    >
+                        <ShieldCheck size={18} /> {t('quality.title')}
+                    </button>
                 </div>
             </div>
 
             <main style={{ padding: '3rem 4rem' }}>
-                {activeTab === 'marketplace' ? (
+                {activeTab === 'marketplace' && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '3rem' }}>
                             <div>
@@ -164,7 +187,9 @@ const BusinessDashboard = () => {
                             </section>
                         </div>
                     </motion.div>
-                ) : (
+                )}
+
+                {activeTab === 'financing' && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ maxWidth: '900px', margin: '0 auto' }}>
                         <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                             <div style={{
@@ -230,6 +255,90 @@ const BusinessDashboard = () => {
                             <button className="btn btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.1rem' }} onClick={() => setShowLoanFlow(true)}>
                                 Initialize Loan Application
                             </button>
+                        </div>
+                    </motion.div>
+                )}
+
+                {activeTab === 'quality' && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                        <div style={{ marginBottom: '3rem' }}>
+                            <h1 style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>{t('quality.title')}</h1>
+                            <p style={{ color: 'var(--text-muted)' }}>{t('quality.desc')}</p>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '2rem' }}>
+                            <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                                    <thead>
+                                        <tr style={{ background: '#f8fafc', borderBottom: '1px solid var(--border)' }}>
+                                            <th style={{ padding: '1.25rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>{t('quality.batchId')}</th>
+                                            <th style={{ padding: '1.25rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>Farmer / {t('quality.crop')}</th>
+                                            <th style={{ padding: '1.25rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>{t('quality.status')}</th>
+                                            <th style={{ padding: '1.25rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>{t('quality.params')}</th>
+                                            <th style={{ padding: '1.25rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {qualityBatches.map(batch => (
+                                            <tr key={batch.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                                                <td style={{ padding: '1.25rem', fontWeight: 600, fontSize: '0.9rem' }}>{batch.id}</td>
+                                                <td style={{ padding: '1.25rem' }}>
+                                                    <div style={{ fontWeight: 600 }}>{batch.farmer}</div>
+                                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{batch.crop}</div>
+                                                </td>
+                                                <td style={{ padding: '1.25rem' }}>
+                                                    <span style={{
+                                                        padding: '0.25rem 0.75rem',
+                                                        borderRadius: 'var(--radius-full)',
+                                                        fontSize: '0.75rem',
+                                                        fontWeight: 700,
+                                                        background: batch.status === 'Optimal' ? 'rgba(16, 185, 129, 0.1)' :
+                                                            batch.status === 'Certified' ? 'rgba(45, 90, 39, 0.1)' : 'rgba(212, 175, 55, 0.1)',
+                                                        color: batch.status === 'Optimal' ? 'var(--success)' :
+                                                            batch.status === 'Certified' ? 'var(--primary)' : '#B8860B'
+                                                    }}>
+                                                        {batch.status === 'Certified' ? t('quality.certified') :
+                                                            batch.status === 'Monitoring' ? t('quality.monitored') : batch.status}
+                                                    </span>
+                                                </td>
+                                                <td style={{ padding: '1.25rem' }}>
+                                                    <div style={{ display: 'flex', gap: '1rem', fontSize: '0.85rem' }}>
+                                                        <div><span style={{ color: 'var(--text-muted)' }}>{t('quality.moisture')}:</span> {batch.moisture}</div>
+                                                        <div><span style={{ color: 'var(--text-muted)' }}>{t('quality.purity')}:</span> {batch.purity}</div>
+                                                    </div>
+                                                </td>
+                                                <td style={{ padding: '1.25rem', textAlign: 'right' }}>
+                                                    <button style={{
+                                                        background: 'none', border: 'none', color: 'var(--primary)',
+                                                        fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer',
+                                                        display: 'flex', alignItems: 'center', gap: '0.25rem'
+                                                    }}>
+                                                        {t('quality.viewReport')} <ArrowRight size={14} />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <aside style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                <div className="card" style={{ padding: '1.5rem', background: 'var(--primary)', color: 'white' }}>
+                                    <h3 style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>{t('quality.estimate')}</h3>
+                                    <div style={{ fontSize: '2rem', fontWeight: 800, marginBottom: '0.5rem' }}>45.2 Tons</div>
+                                    <p style={{ fontSize: '0.85rem', opacity: 0.8 }}>Expected total yield across all active tracked contracts.</p>
+                                </div>
+                                <div className="card" style={{ padding: '1.5rem' }}>
+                                    <h3 style={{ marginBottom: '1rem', fontSize: '1rem' }}>{t('quality.lastUpdate')}</h3>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                                        <CheckCircle size={16} color="var(--success)" />
+                                        All sensors active
+                                    </div>
+                                    <div style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                        Satellite data refreshed 45 mins ago.
+                                    </div>
+                                </div>
+                            </aside>
                         </div>
                     </motion.div>
                 )}
